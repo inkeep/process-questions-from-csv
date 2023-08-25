@@ -1,0 +1,279 @@
+type BotMessage implements ChatMessage {
+  id: ID!
+  content: String!
+  citations: [ChatCitation!]!
+  codeBlocks: [CodeBlock!]
+}
+
+type CodeBlock {
+  language: CodeLanguage!
+  code: String!
+}
+
+enum CodeLanguage {
+  SQL
+  PYTHON
+  UNDEFINED
+}
+
+type UserMessage implements ChatMessage {
+  id: ID!
+  content: String!
+}
+
+type ChatCitation {
+  citationNumber: Int!
+  title: String
+  url: String!
+  rootRecordId: ID
+  rootRecordType: RecordType
+}
+
+interface ChatMessage {
+  id: ID!
+  content: String!
+}
+
+enum ChatMode {
+  TURBO
+  AUTO
+}
+
+type ChatResult {
+  sessionId: ID!
+  message: BotMessage!
+  isEnd: Boolean!
+}
+
+type ChatSession {
+  id: ID!
+  organizationId: String!
+  messages: [ChatMessage!]!
+  chatMode: ChatMode!
+  outputMode: OutputMode!
+  product: String
+  productVersion: String
+  isSharedSession: Boolean!
+}
+
+enum OutputMode {
+  DEFAULT
+  SQL
+  PYTHON
+  CODE
+}
+
+input ContinueChatResultInput {
+  messageInput: String!
+  sessionId: ID!
+}
+
+type DiscourseRecord implements SearchRootRecord {
+  id: ID!
+  url: String
+  title: String
+  preview: String
+  body: String
+  bodyHtml: String
+  categoryBreadcrumbs: [String!]!
+  createdAt: DateTime!
+}
+
+interface SearchRootRecord {
+  id: ID!
+  url: String
+  title: String
+  preview: String
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+type DiscourseHit implements SearchHit {
+  id: ID!
+  rootRecord: DiscourseRecord!
+  hitOnRoot: Boolean!
+  url: String
+  title: String
+  preview: String
+}
+
+type DocumentationRecord implements SearchRootRecord {
+  id: ID!
+  url: String
+  title: String
+  preview: String
+  pathBreadcrumbs: [String!]
+  contentType: String!
+  topLevelHeadings: [DocumentationContentLevel!]!
+  firstContentPath: [DocumentationContentLevel!]!
+  firstContent: String!
+}
+
+type DocumentationContentLevel {
+  anchor: String
+  url: String
+  htmlTag: String!
+  content: String!
+  contentHtml: String!
+}
+
+type DocumentationHit implements SearchHit {
+  id: ID!
+  rootRecord: SearchRootRecord!
+  hitOnRoot: Boolean!
+  url: String
+  title: String
+  preview: String
+  pathHeadings: [DocumentationContentLevel!]!
+  content: DocumentationContentLevel!
+}
+
+type GitHubIssueRecord implements SearchRootRecord {
+  id: ID!
+  url: String
+  title: String
+  preview: String
+  body: String
+  state: GitHubIssueState!
+  createdAt: DateTime!
+  commentsWithMostPositiveReactions: [GitHubIssueComment!]!
+  reactions: [GitHubReaction!]!
+}
+
+enum GitHubIssueState {
+  CLOSED
+  OPEN
+}
+
+type GitHubIssueComment {
+  id: ID!
+  url: String!
+  body: String
+  commentDate: DateTime!
+  reactions: [GitHubReaction!]!
+}
+
+type GitHubReaction {
+  reactionType: ReactionType!
+  count: Int!
+}
+
+enum ReactionType {
+  PLUS_ONE
+  MINUS_ONE
+  LAUGH
+  CONFUSED
+  HEART
+  HOORAY
+  ROCKET
+  EYES
+}
+
+type GitHubIssueHit implements SearchHit {
+  id: ID!
+  rootRecord: GitHubIssueRecord!
+  hitOnRoot: Boolean!
+  url: String
+  title: String
+  preview: String
+}
+
+input NewSessionChatResultInput {
+  messageInput: String!
+  organizationId: ID = null
+  integrationId: ID = null
+  chatMode: ChatMode = AUTO
+  outputMode: OutputMode = DEFAULT
+  product: String = null
+  productVersion: String = null
+}
+
+enum RecordType {
+  DOCUMENTATION
+  GITHUB_ISSUE
+  DISCOURSE
+  STACKOVERFLOW
+}
+
+input SearchFiltersInput {
+  product: String = null
+  productVersion: String = null
+  sources: [RecordType!] = null
+  limit: Int = null
+}
+
+interface SearchHit {
+  id: ID!
+  rootRecord: SearchRootRecord!
+  hitOnRoot: Boolean!
+  url: String
+  title: String
+  preview: String
+}
+
+input SearchInput {
+  searchQuery: String!
+  organizationId: ID = null
+  integrationId: ID = null
+  searchMode: SearchMode = null
+  filters: SearchFiltersInput = null
+}
+
+enum SearchMode {
+  AUTO
+  KEYWORD
+  INTELLIGENT
+}
+
+type SearchResult {
+  searchHits: [SearchHit!]!
+  searchQuery: String!
+}
+
+type StackOverflowRecord implements SearchRootRecord {
+  id: ID!
+  url: String
+  title: String
+  preview: String
+  body: String
+  bodyHtml: String
+  tags: [String!]!
+  createdAt: DateTime!
+  topVotedAnswer: StackOverflowAnswer
+  markedAsCorrectAnswer: StackOverflowAnswer
+  score: Int!
+}
+
+type StackOverflowAnswer {
+  id: ID!
+  url: String!
+  score: Int!
+  content: String!
+  contentHtml: String!
+}
+
+type StackOverflowHit implements SearchHit {
+  id: ID!
+  rootRecord: StackOverflowRecord!
+  hitOnRoot: Boolean!
+  url: String
+  title: String
+  preview: String
+}
+
+type Query {
+  search(searchInput: SearchInput!): SearchResult!
+  getSearchRootRecords(ids: [ID!]!): [SearchRootRecord!]!
+  getChatSession(id: ID!): ChatSession!
+  hello: String
+}
+
+type Mutation {
+  copyChatSession(sessionId: ID!, isSharedSession: Boolean!): ID!
+}
+
+type Subscription {
+  continueChatResult(input: ContinueChatResultInput!): ChatResult!
+  newSessionChatResult(input: NewSessionChatResultInput!): ChatResult!
+}
