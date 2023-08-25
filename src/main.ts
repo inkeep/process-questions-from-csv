@@ -1,13 +1,19 @@
-import { processFromCSV } from './processCSV'; // Adjust the path if needed
+import { processFromCSV } from './processCSV';
+import dotenv from 'dotenv';
 
-const filePath = 'inputs/questions.csv';  // Replace with your input CSV file path
-const shareUrlBasePath = 'https://share.inkeep.com/inkeep/d80e8eba3748';
+dotenv.config();
+
+
+if (!process.env.FILE_PATH || !process.env.SHARE_URL_BASE_PATH) {
+  throw new Error("Environment variables FILE_PATH and/or SHARE_URL_BASE_PATH are not defined.");
+}
+
+const filePath = process.env.FILE_PATH;
+const shareUrlBasePath = process.env.SHARE_URL_BASE_PATH;
 
 (async () => {
     try {
-      console.log("running script");
         await processFromCSV(filePath, shareUrlBasePath);
-        console.log('Processing completed.');
     } catch (error) {
         console.error('An error occurred during processing:', error);
     }
