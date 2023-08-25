@@ -1,9 +1,9 @@
 {
-  "name": "inkeep-quickstart-search-chat-api-graphql",
+  "name": "inkeep-process-questions-from-csv",
   "version": "0.0.1",
   "description": "Quickstart for calling the Inkeep Search and Chat GraphQL APIs",
-  "main": "main.ts",
-  "repository": "https://github.com/inkeep/quick-start-search-chat-api.git",
+  "main": "dist/main.ts",
+  "repository": "https://github.com/inkeep/process-questions-from-csv.git",
   "author": "Me",
   "license": "MIT",
   "private": true,
@@ -21,6 +21,7 @@
   "dependencies": {
     "@urql/core": "^4.1.1",
     "dotenv": "^16.3.1",
+    "fast-csv": "^4.3.6",
     "graphql-ws": "^5.14.0",
     "ws": "^8.13.0"
   },

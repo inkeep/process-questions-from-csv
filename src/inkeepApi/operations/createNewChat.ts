@@ -21,7 +21,7 @@ const NEW_CHAT_SUB = gql`
   }
 `;
 
-const createNewChat = async (variables: NewChatSubscriptionVariables, apiKey?: string): Promise<NewChatSubscription['newSessionChatResult']> => {
+export const createNewChat = async (variables: NewChatSubscriptionVariables, apiKey?: string): Promise<NewChatSubscription['newSessionChatResult']> => {
   const client = createInkeepClient(apiKey);
   
   // Merging defaultValues with provided variables
@@ -56,5 +56,3 @@ const createNewChat = async (variables: NewChatSubscriptionVariables, apiKey?: s
     });
   });
 };
-
-export default createNewChat;

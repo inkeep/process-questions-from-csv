@@ -131,3 +131,9 @@ dist
 
 # MacOS
 .DS_Store
+
+# output files
+outputs/*
+
+# input files
+inputs/*
