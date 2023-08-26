@@ -17,7 +17,7 @@ The file name of the output csv will be:
 Format of the output file will be:
 ``` 
 question,answer,view_chat_url
-"What sources...","Inkeep supports....","https://share.inkeep.com/<orgAlias>/<sandboxId>"
+"What sources...","Inkeep supports....",https://share.inkeep.com/<orgAlias>/<sandboxId>
 ```
 
 ## Requirements
