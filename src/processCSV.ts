@@ -4,7 +4,7 @@ import { createNewChat } from "./inkeepApi/operations/createNewChat";
 import { removeCitations } from "./stripCitations";
 
 const BATCH_SIZE = 5;
-const CONSECUTIVE_FAILURE_THRESHOLD = 2; // Adjust this value as needed
+const CONSECUTIVE_FAILURE_THRESHOLD = 2;
 
 const readCSV = (path: string): Promise<string[]> => {
     return new Promise((resolve, reject) => {
@@ -54,7 +54,7 @@ const processBatch = async (
         currentCount++;
     });
 
-    return { results, failureCount, currentCount }; // Return the updated count
+    return { results, failureCount, currentCount };
 };
 
 export const processFromCSV = async (
@@ -74,7 +74,7 @@ export const processFromCSV = async (
             results,
             failureCount,
             currentCount: updatedCount,
-        } = await processBatch(batch, shareUrlBasePath, currentCount); // Pass and receive the count
+        } = await processBatch(batch, shareUrlBasePath, currentCount); 
         if (failureCount > CONSECUTIVE_FAILURE_THRESHOLD) {
             console.log(
                 `Stopping execution due to exceeding failure threshold of ${CONSECUTIVE_FAILURE_THRESHOLD} in a single batch.`
@@ -83,7 +83,7 @@ export const processFromCSV = async (
         }
         outputData.push(...results);
         count += results.length;
-        currentCount = updatedCount; // Update the count for next iteration
+        currentCount = updatedCount;
     }
 
     const timestamp = Date.now();
