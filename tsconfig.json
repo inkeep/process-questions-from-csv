@@ -8,7 +8,7 @@
       "*": ["node_modules/*"]
     },
     "sourceMap": true,
-    "outDir": "./",
+    "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

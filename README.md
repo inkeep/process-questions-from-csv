@@ -4,7 +4,7 @@ This repo is a sample of how to batch process questions from a CSV into an outpu
 
 The format of the input csv should be:
 
-``` 
+```
 question
 "What sources does Inkeep support?"
 "What value does Inkeep provide compared to other retrieval and chat services?"
@@ -15,10 +15,13 @@ The file name of the output csv will be:
 `./outputs/output_${count}_${timestamp}.csv`
 
 Format of the output file will be:
-``` 
+
+```
 question,answer,view_chat_url
 "What sources...","Inkeep supports....",https://share.inkeep.com/<orgAlias>/<sandboxId>
 ```
+
+You can view the chat response in the web view by using the given url.
 
 ## Requirements
 
@@ -49,6 +52,8 @@ question,answer,view_chat_url
     INKEEP_INTEGRATION_ID=<your-api-key-id>
     FILE_PATH=inputs/<filename>.csv
     SHARE_URL_BASE_PATH=https://share.inkeep.com/<orgAlias>/<sandboxId>
+    INKEEP_API_KEY=62a0400e7d809a97958caf7bbc5eec142587deefb81e5543
+   CHAT_MODE=AUTO
    ```
 
 4. Run

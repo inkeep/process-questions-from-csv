@@ -3,7 +3,7 @@ import fs, { promises as fsPromises } from "fs";
 import { createNewChat } from "./inkeepApi/operations/createNewChat";
 import { removeCitations } from "./stripCitations";
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 3;
 const CONSECUTIVE_FAILURE_THRESHOLD = 2;
 
 const readCSV = (path: string): Promise<string[]> => {
@@ -74,7 +74,7 @@ export const processFromCSV = async (
             results,
             failureCount,
             currentCount: updatedCount,
-        } = await processBatch(batch, shareUrlBasePath, currentCount); 
+        } = await processBatch(batch, shareUrlBasePath, currentCount);
         if (failureCount > CONSECUTIVE_FAILURE_THRESHOLD) {
             console.log(
                 `Stopping execution due to exceeding failure threshold of ${CONSECUTIVE_FAILURE_THRESHOLD} in a single batch.`

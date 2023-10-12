@@ -137,3 +137,5 @@ outputs/*
 
 # input files
 # inputs/*
+
+build/*

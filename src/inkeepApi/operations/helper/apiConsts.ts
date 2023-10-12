@@ -7,7 +7,8 @@ dotenv.config();
 // Define the constants
 export const organizationId = process.env.INKEEP_ORGANIZATION_ID;
 export const integrationId = process.env.INKEEP_INTEGRATION_ID;
-export const chatMode = ChatMode.Auto;  // This can be changed as needed
+// Parse chat mode from environment variable and cast it to ChatMode enum
+export const chatMode = process.env.CHAT_MODE === 'TURBO' ? ChatMode.Turbo : ChatMode.Auto;
 
 if (!organizationId || !integrationId) {
   console.error('Error: INKEEP_ORGANIZATION_ID and/or INKEEP_INTEGRATION_ID environment variables are not defined');
