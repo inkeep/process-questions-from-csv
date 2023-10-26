@@ -16,6 +16,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** Date with time (isoformat) */
   DateTime: { input: any; output: any; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: { input: any; output: any; }
 };
 
 export type BotMessage = ChatMessage & {
@@ -35,6 +37,21 @@ export type ChatCitation = {
   url: Scalars['String']['output'];
 };
 
+export type ChatFilters = {
+  __typename?: 'ChatFilters';
+  attributes?: Maybe<Scalars['JSON']['output']>;
+  product?: Maybe<Scalars['String']['output']>;
+  productVersion?: Maybe<Scalars['String']['output']>;
+  sourceIds?: Maybe<Scalars['String']['output']>;
+};
+
+export type ChatFiltersInput = {
+  attributes?: InputMaybe<Scalars['JSON']['input']>;
+  product?: InputMaybe<Scalars['String']['input']>;
+  productVersion?: InputMaybe<Scalars['String']['input']>;
+  sourceIds?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ChatMessage = {
   content: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -49,19 +66,26 @@ export type ChatResult = {
   __typename?: 'ChatResult';
   isEnd: Scalars['Boolean']['output'];
   message: BotMessage;
+  postChatResultSignals?: Maybe<PostChatResultSignals>;
   sessionId: Scalars['ID']['output'];
 };
 
 export type ChatSession = {
   __typename?: 'ChatSession';
   chatMode: ChatMode;
+  filters?: Maybe<ChatFilters>;
   id: Scalars['ID']['output'];
+  integrationId: Scalars['String']['output'];
   isSharedSession: Scalars['Boolean']['output'];
   messages: Array<ChatMessage>;
   organizationId: Scalars['String']['output'];
   outputMode: OutputMode;
   product?: Maybe<Scalars['String']['output']>;
   productVersion?: Maybe<Scalars['String']['output']>;
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  userAttributes?: Maybe<Scalars['JSON']['output']>;
+  workflowId?: Maybe<Scalars['String']['output']>;
+  workflowVersion?: Maybe<Scalars['String']['output']>;
 };
 
 export type CodeBlock = {
@@ -77,6 +101,8 @@ export enum CodeLanguage {
 }
 
 export type ContinueChatResultInput = {
+  messageAttributes?: InputMaybe<Scalars['JSON']['input']>;
+  messageContext?: InputMaybe<Scalars['String']['input']>;
   messageInput: Scalars['String']['input'];
   sessionId: Scalars['ID']['input'];
 };
@@ -193,12 +219,19 @@ export type MutationCopyChatSessionArgs = {
 
 export type NewSessionChatResultInput = {
   chatMode?: InputMaybe<ChatMode>;
+  filters?: InputMaybe<ChatFiltersInput>;
   integrationId?: InputMaybe<Scalars['ID']['input']>;
+  messageAttributes?: InputMaybe<Scalars['JSON']['input']>;
+  messageContext?: InputMaybe<Scalars['String']['input']>;
   messageInput: Scalars['String']['input'];
   organizationId?: InputMaybe<Scalars['ID']['input']>;
   outputMode?: InputMaybe<OutputMode>;
   product?: InputMaybe<Scalars['String']['input']>;
   productVersion?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  userAttributes?: InputMaybe<Scalars['JSON']['input']>;
+  workflowId?: InputMaybe<Scalars['String']['input']>;
+  workflowVersion?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum OutputMode {
@@ -207,6 +240,12 @@ export enum OutputMode {
   Python = 'PYTHON',
   Sql = 'SQL'
 }
+
+export type PostChatResultSignals = {
+  __typename?: 'PostChatResultSignals';
+  botAbleToAnswerGivenSources?: Maybe<Scalars['Boolean']['output']>;
+  suggestedFollowupQuestions?: Maybe<Array<Scalars['String']['output']>>;
+};
 
 export type Query = {
   __typename?: 'Query';
@@ -243,16 +282,22 @@ export enum ReactionType {
 }
 
 export enum RecordType {
+  Discord = 'DISCORD',
+  DiscordMessage = 'DISCORD_MESSAGE',
   Discourse = 'DISCOURSE',
   Documentation = 'DOCUMENTATION',
+  GithubDiscussion = 'GITHUB_DISCUSSION',
   GithubIssue = 'GITHUB_ISSUE',
+  Manual = 'MANUAL',
   Stackoverflow = 'STACKOVERFLOW'
 }
 
 export type SearchFiltersInput = {
+  attributes?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   product?: InputMaybe<Scalars['String']['input']>;
   productVersion?: InputMaybe<Scalars['String']['input']>;
+  sourceIds?: InputMaybe<Scalars['String']['input']>;
   sources?: InputMaybe<Array<RecordType>>;
 };
 
@@ -344,7 +389,9 @@ export type SubscriptionNewSessionChatResultArgs = {
 
 export type UserMessage = ChatMessage & {
   __typename?: 'UserMessage';
+  attributes?: Maybe<Scalars['JSON']['output']>;
   content: Scalars['String']['output'];
+  context?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
 };
 

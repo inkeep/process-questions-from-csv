@@ -17,9 +17,9 @@ const SEARCH_QUERY = gql`
 `;
 
 export const search = async (searchInput: SearchInput, apiKey?: string): Promise<SearchQuery['search']['searchHits']> => {
-  
+
   const client = createInkeepClient(apiKey);
-  
+
   const enhancedSearchInput = {
     ...defaultValues.organizationId && { organizationId: defaultValues.organizationId },
     ...defaultValues.integrationId && { integrationId: defaultValues.integrationId },

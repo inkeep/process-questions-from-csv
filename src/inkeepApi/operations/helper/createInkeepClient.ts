@@ -45,8 +45,11 @@ const createInkeepClient = (overrideApiKey?: string): Client => {
       subscriptionExchange({
         forwardSubscription: request => ({
           subscribe: sink => {
+            const finalRequest = { ...request, query: request.query || '' };
+            console.log('Final request:', finalRequest);
+
             const unsubscribeCallback = wsClient.subscribe(
-              { ...request, query: request.query || '' },
+              finalRequest,
               sink,
             );
 

@@ -22,6 +22,16 @@ const readCSV = (path: string): Promise<string[]> => {
     });
 };
 
+const getTags = (): string[] | undefined => {
+    const tags = process.env.tags;
+    if (!tags) return undefined;
+    const tagList = tags.split(",");
+    const isValid = tagList.every(tag => typeof tag === 'string');
+    return isValid ? tagList : undefined;
+};
+
+const tags = getTags();
+
 const processBatch = async (
     batch: string[],
     shareUrlBasePath: string,
@@ -31,7 +41,7 @@ const processBatch = async (
     const promises = batch.map(async (question) => {
         try {
             const chatResult = await createNewChat({
-                input: { messageInput: question },
+                input: { messageInput: question, tags: getTags() },
             });
             const answer = removeCitations(chatResult.message.content);
             const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.sessionId}`;

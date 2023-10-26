@@ -22,11 +22,14 @@ async function fetchSchema(endpoint: string): Promise<string> {
   return printSchema(schema);
 }
 
-const endpoint = 'https://api.ingest.inkeep.com/graphql';
+// Get domain from command line arguments and construct endpoint and filename
+const domain = process.argv[2];
+const endpoint = `https://${domain}/graphql`;
+const filename = `${domain.replace(/\./g, '-')}-sdl.graphql`;
 
 fetchSchema(endpoint).then((schemaSDL) => {
-  fs.writeFileSync('./inkeep-ingest-api-sdl.graphql', schemaSDL);
-  console.log('Schema has been saved to inkeep-api-sdl.graphql');
+  fs.writeFileSync(filename, schemaSDL);
+  console.log(`Schema has been saved to ${filename}`);
 }).catch((error) => {
   console.error('An error occurred:', error);
 });
