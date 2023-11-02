@@ -30,7 +30,6 @@ const getTags = (): string[] | undefined => {
     return isValid ? tagList : undefined;
 };
 
-const tags = getTags();
 
 const processBatch = async (
     batch: string[],
@@ -40,11 +39,13 @@ const processBatch = async (
     let failureCount = 0;
     const promises = batch.map(async (question) => {
         try {
+            const tags = getTags();
             const chatResult = await createNewChat({
-                input: { messageInput: question, tags: getTags() },
+                input: { messageInput: question, tags },
             });
             const answer = removeCitations(chatResult.message.content);
-            const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.sessionId}`;
+            const tagsQueryParam = tags ? `&tags=${tags.join(',')}` : '';
+            const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.sessionId}${tagsQueryParam}`;
             return { question, answer, view_chat_url };
         } catch (error) {
             console.error("Error processing chat:", error);
