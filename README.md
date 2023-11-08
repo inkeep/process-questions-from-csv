@@ -65,7 +65,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
     TAGS=123456789,234567891
    ```
 
-See the `env.sample` for a template.
+See the `env.sample` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
 
 4. Run the script
 
