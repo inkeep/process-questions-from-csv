@@ -1,7 +1,10 @@
 import * as fastcsv from "fast-csv";
-import fs, { promises as fsPromises } from "fs";
-import { createNewChat } from "./inkeepApi/operations/createNewChat";
-import { removeCitations } from "./stripCitations";
+import fs, {promises as fsPromises} from "fs";
+import {createNewChat} from "./inkeepApi/operations/createNewChat";
+import {removeCitations} from "./stripCitations";
+import {continueExistingChat} from "./inkeepApi/operations/continueExistingChat";
+import * as process from "node:process";
+import * as defaultValues from "./inkeepApi/operations/helper/apiConsts";
 
 const BATCH_SIZE = 3;
 const CONSECUTIVE_FAILURE_THRESHOLD = 2;
@@ -40,12 +43,31 @@ const processBatch = async (
     const promises = batch.map(async (question) => {
         try {
             const tags = getTags();
-            const chatResult = await createNewChat({
-                input: { messageInput: question, tags },
-            });
-            const answer = removeCitations(chatResult.message.content);
+            const chatResult = await createNewChat({variables:{
+                chatSession: {
+                    messages: [{
+                        content: question,
+                        role: "user",
+                    }]
+                },
+                chatMode: "TURBO",
+                    integrationId: defaultValues.integrationId || "",
+                    stream: false,
+            }}
+            );
+            const continueChat = await continueExistingChat({ chatSessionId: chatResult.chatResult?.chatSessionId || "",
+            variables: {
+                integrationId: process.env.INKEEP_INTEGRATION_ID as string,
+                message: {
+                    role: "user",
+                    content: "What's next?",
+                },
+                stream: false,
+            }});
+
+            const answer = removeCitations(chatResult.chatResult?.message.content || "");
             const tagsQueryParam = tags ? `&tags=${tags.join(',')}` : '';
-            const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.sessionId}${tagsQueryParam}`;
+            const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatResult?.chatSessionId}${tagsQueryParam}`;
             return { question, answer, view_chat_url };
         } catch (error) {
             console.error("Error processing chat:", error);

@@ -1,60 +1,22 @@
-import { gql } from "@urql/core";
-import createInkeepClient from "./helper/createInkeepClient";
-import type {
-  ContinueExistingChatSubscription,
-  ContinueExistingChatSubscriptionVariables,
-} from "../generated/graphql";
-import { setupTimeouts, clearResponseTimeout } from "./helper/timeouts";
+import {InkeepAI} from "@inkeep/ai-api";
+import * as process from "node:process";
 
-const CONTINUE_EXISTING_CHAT_SUB = gql`
-  subscription ContinueExistingChat($input: ContinueChatResultInput!) {
-    continueChatResult(input: $input) {
-      isEnd
-      message {
-        content
-        id
-        citations {
-          title
-          url
-        }
-      }
-      sessionId
-    }
-  }
-`;
+import {
+  ContinueChatSessionWithChatResultInput
+} from "@inkeep/ai-api/src/models/components/continuechatsessionwithchatresultinput";
+import {RequestOptions} from "@inkeep/ai-api/src/lib/sdks";
+import {ContinueAcceptEnum} from "@inkeep/ai-api/src/sdk/chatsession";
 
-const continueExistingChat = async (
-  variables: ContinueExistingChatSubscriptionVariables,
-  apiKey?: string
-): Promise<ContinueExistingChatSubscription["continueChatResult"]> => {
-  const client = createInkeepClient(apiKey);
-  return new Promise((resolve, reject) => {
-    const subscriptionClient = client.subscription<
-      ContinueExistingChatSubscription,
-      ContinueExistingChatSubscriptionVariables
-    >(CONTINUE_EXISTING_CHAT_SUB, variables);
+type continueChatSessionInput= {
+  chatSessionId: string;
+  variables: ContinueChatSessionWithChatResultInput;
+  options?: RequestOptions & { acceptHeaderOverride?: ContinueAcceptEnum }
+}
 
-    const subscription = subscriptionClient.subscribe((onResult) => {});
-
-    const timeouts = setupTimeouts(reject, subscription);
-
-    subscriptionClient.subscribe((onResult) => {
-      clearResponseTimeout(timeouts);
-
-      if (!onResult || onResult.error) {
-        console.error(
-          "Error in receiving the response:",
-          onResult?.error
-        ); // Log the error
-        reject(new Error("Error in receiving the response"));
-        return;
-      }
-
-      if (onResult.data?.continueChatResult.isEnd) {
-        resolve(onResult.data.continueChatResult);
-      }
-    });
+export const continueExistingChat = async ({chatSessionId, variables, options }:continueChatSessionInput) => {
+  const sdk = new InkeepAI({
+    apiKey: process.env.INKEEP_API_KEY,
   });
-};
 
-export default continueExistingChat;
+  return await sdk.chatSession.continue(chatSessionId, variables, options)
+}
