@@ -52,12 +52,12 @@ const processBatch = async (
                 },
                 chatMode: "TURBO",
                     integrationId: defaultValues.integrationId || "",
-                    stream: false,
+                    stream: true,
             }}
             );
             const continueChat = await continueExistingChat({ chatSessionId: chatResult.chatResult?.chatSessionId || "",
             variables: {
-                integrationId: process.env.INKEEP_INTEGRATION_ID as string,
+                integrationId: process.env.INKEEP_INTEGRATION_ID || "",
                 message: {
                     role: "user",
                     content: "What's next?",
