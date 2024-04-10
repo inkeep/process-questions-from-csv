@@ -52,7 +52,7 @@ const processBatch = async (
                 },
                 chatMode: "TURBO",
                     integrationId: defaultValues.integrationId || "",
-                    stream: true,
+                    stream: false,
             }}
             );
             const continueChat = await continueExistingChat({ chatSessionId: chatResult.chatResult?.chatSessionId || "",
