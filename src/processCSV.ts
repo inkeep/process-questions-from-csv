@@ -2,7 +2,7 @@ import * as fastcsv from "fast-csv";
 import fs, {promises as fsPromises} from "fs";
 import {createNewChat} from "./inkeepApi/operations/createNewChat";
 import {removeCitations} from "./stripCitations";
-import {continueExistingChat} from "./inkeepApi/operations/continueExistingChat";
+/*import {continueExistingChat} from "./inkeepApi/operations/continueExistingChat";*/
 import * as process from "node:process";
 import * as defaultValues from "./inkeepApi/operations/helper/apiConsts";
 
@@ -55,7 +55,8 @@ const processBatch = async (
                     stream: false,
             }}
             );
-            const continueChat = await continueExistingChat({ chatSessionId: chatResult.chatResult?.chatSessionId || "",
+            // an example of how you can continue the chat and an example of the request data structure
+            /*const continueChat = await continueExistingChat({ chatSessionId: chatResult.chatResult?.chatSessionId || "",
             variables: {
                 integrationId: process.env.INKEEP_INTEGRATION_ID || "",
                 message: {
@@ -63,8 +64,7 @@ const processBatch = async (
                     content: "What's next?",
                 },
                 stream: false,
-            }});
-
+            }});*/
             const answer = removeCitations(chatResult.chatResult?.message.content || "");
             const tagsQueryParam = tags ? `&tags=${tags.join(',')}` : '';
             const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatResult?.chatSessionId}${tagsQueryParam}`;
