@@ -1,10 +1,10 @@
 import * as fastcsv from "fast-csv";
-import fs, { promises as fsPromises } from "fs";
-import { createNewChat } from "./inkeepApi/operations/createNewChat";
-import { removeCitations } from "./stripCitations";
-/*import {continueExistingChat} from "./inkeepApi/operations/continueExistingChat";*/
-import * as process from "node:process";
-import * as defaultValues from "./inkeepApi/operations/helper/apiConsts";
+import fs, {promises as fsPromises} from "fs";
+import {removeCitations} from "./stripCitations";
+import {envServerSchema} from "./serverEnvSchema";
+import {InkeepAI} from "@inkeep/ai-api";
+
+const integrationId = envServerSchema.INKEEP_INTEGRATION_ID;
 
 const BATCH_SIZE = 3;
 const CONSECUTIVE_FAILURE_THRESHOLD = 2;
@@ -25,12 +25,9 @@ const readCSV = (path: string): Promise<string[]> => {
   });
 };
 
-const getTags = (): string[] | undefined => {
-  const tags = process.env.tags;
-  if (!tags) return undefined;
-  const tagList = tags.split(",");
-  const isValid = tagList.every((tag) => typeof tag === "string");
-  return isValid ? tagList : undefined;
+const getTags = (): string[] => {
+    const tags = envServerSchema.TAGS;
+    return tags.split(",")
 };
 
 const processBatch = async (
@@ -38,37 +35,45 @@ const processBatch = async (
   shareUrlBasePath: string,
   currentCount: number
 ) => {
-  let failureCount = 0;
-  const promises = batch.map(async (question) => {
-    try {
-      const tags = getTags();
-      const chatResult = await createNewChat({
-        variables: {
-          chatSession: {
-            messages: [
-              {
-                content: question,
-                role: "user",
-              },
-            ],
-          },
-          chatMode: process.env.CHAT_MODE,
-          integrationId: defaultValues.integrationId || "",
-          stream: false,
-        },
-      });
-      const answer = removeCitations(
-        chatResult.chatResult?.message.content || ""
-      );
-      const tagsQueryParam = tags ? `&tags=${tags.join(",")}` : "";
-      const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatResult?.chatSessionId}${tagsQueryParam}`;
-      return { question, answer, view_chat_url };
-    } catch (error) {
-      console.error("Error processing chat:", error);
-      failureCount++;
-      return null;
-    }
-  });
+    let failureCount = 0;
+    const promises = batch.map(async (question) => {
+        try {
+            const tags = getTags();
+            const sdk = new InkeepAI({
+                apiKey: envServerSchema.INKEEP_API_KEY,
+            });
+            const chatResult = await sdk.chatSession.create({
+                chatSession: {
+                    messages: [{
+                        content: question,
+                        role: "user",
+                    }]
+                },
+                chatMode: "TURBO",
+                integrationId: integrationId,
+                stream: false,
+            })
+
+            // an example of how you can continue the chat and an example of the request data structure
+           /* await sdk.chatSession.continue(chatResult?.chatResult?.chatSessionId || "",{
+                    integrationId: envServerSchema.INKEEP_INTEGRATION_ID,
+                    message: {
+                        role: "user",
+                        content: "What's next?",
+                    },
+                    stream: false,
+                })*/
+
+            const answer = removeCitations(chatResult.chatResult?.message.content || "");
+            const tagsQueryParam = tags ? `&tags=${tags.join(',')}` : '';
+            const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatResult?.chatSessionId}${tagsQueryParam}`;
+            return { question, answer, view_chat_url };
+        } catch (error) {
+            console.error("Error processing chat:", error);
+            failureCount++;
+            return null;
+        }
+    });
 
   const results = (await Promise.all(promises)).filter((r) => r !== null) as {
     question: string;

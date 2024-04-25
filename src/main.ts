@@ -1,15 +1,11 @@
 import { processFromCSV } from './processCSV';
 import dotenv from 'dotenv';
+import { envServerSchema } from "./serverEnvSchema";
 
 dotenv.config();
 
-
-if (!process.env.FILE_PATH || !process.env.SHARE_URL_BASE_PATH) {
-  throw new Error("Environment variables FILE_PATH and/or SHARE_URL_BASE_PATH are not defined.");
-}
-
-const filePath = process.env.FILE_PATH;
-const shareUrlBasePath = process.env.SHARE_URL_BASE_PATH;
+const filePath = envServerSchema.FILE_PATH;
+const shareUrlBasePath = envServerSchema.SHARE_URL_BASE_PATH;
 
 (async () => {
     try {
