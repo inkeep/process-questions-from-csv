@@ -138,6 +138,7 @@ dist
 outputs/*
 
 # input files
-# inputs/*
+inputs/*
+!inputs/questions.csv
 
 build/*

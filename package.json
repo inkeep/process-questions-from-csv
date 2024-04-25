@@ -30,6 +30,6 @@
     "build": "tsc",
     "start": "node dist/src/main.js",
     "inkeep-chat-api-codegen": "graphql-codegen --config inkeep-chat-api-codegen.ts",
-    "inkeep-generate-sdl": "ts-node utils/generateInkeepGraphQLSdl.ts api.management.inkeep.com"
+    "inkeep-generate-sdl": "ts-node utils/generateInkeepGraphQLSdl.ts api.inkeep.com"
   }
 }

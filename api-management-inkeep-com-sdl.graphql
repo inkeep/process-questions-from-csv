@@ -1,0 +1,1601 @@
+directive @oneOf on INPUT_OBJECT | FIELD_DEFINITION
+
+type Mutation {
+  logUsageEvent(input: LogUsageEventInput!): LogUsageEventResult!
+  logChatPositiveFeedback(input: LogChatPositiveFeedbackInput!): LogChatPositiveFeedbackResponse!
+  logChatNegativeFeedback(input: LogChatNegativeFeedbackInput!): LogChatNegativeFeedbackResponse!
+  createSourceIndex(input: CreateSourceIndexInput!): CreateSourceIndexResult!
+  deleteSourceIndex(sourceIndexId: ID!): DeleteSourceIndexResult!
+  addIndexingJob(input: AddIndexingJobInput!): AddIndexingJobResult!
+  updateIndexingJob(input: UpdateIndexingJobInput!): UpdateIndexingJobResult!
+  updateEnabledIndexesForSource(input: UpdateEnabledIndexesForSourceInput!): UpdateEnabledIndexesForSourceResult!
+  createIntegration(input: CreateIntegrationInput!): CreateIntegrationResult!
+  updateIntegration(input: UpdateIntegrationInput!): UpdateIntegrationResult!
+  regenerateIntegrationApiKey(integrationId: ID!): RegenerateIntegrationApiKeyResult!
+  deleteIntegration(integrationId: ID!): DeleteIntegrationResult!
+  createCustomQuestionAnswer(input: CreateCustomQuestionAnswerInput!): CreateCustomQuestionAnswerResult!
+  updateCustomQuestionAnswer(input: UpdateCustomQuestionAnswerInput!): UpdateCustomQuestionAnswerResult!
+  deleteCustomQuestionAnswer(id: ID!): DeleteCustomQuestionAnswerResult!
+  submitRevisedAnswer(input: SubmitRevisedAnswerInput!): SubmitRevisedAnswerResult!
+  updateRevisedAnswer(input: UpdateRevisedAnswerInput!): UpdateRevisedAnswerResult!
+  deleteRevisedAnswer(id: ID!): DeleteRevisedAnswerResult!
+  createOrganization(input: CreateOrganizationInput!): CreateOrganizationResult!
+  updateOrganization(input: UpdateOrganizationInput!): UpdateOrganizationResult!
+  uploadOrganizationIcon(input: UploadOrganizationIconInput!): UploadOrganizationIconResult!
+  inviteMemberToOrganization(input: InviteMemberToOrganizationInput!): InviteMemberToOrganizationResult!
+  createProject(input: CreateProjectInput!): CreateProjectResult!
+  updateProject(input: UpdateProjectInput!): UpdateProjectResult!
+  deleteProject(projectId: ID!): DeleteProjectResult!
+  setDefaultProjectForUser(input: SetDefaultProjectForUserInput!): SetDefaultProjectForUserResult!
+  setDefaultProjectForOrganization(input: SetDefaultProjectForOrganizationInput!): SetDefaultProjectForOrganizationResult!
+  createSandbox(input: CreateSandboxInput!): CreateSandboxResult!
+  changeSandboxExpiryDate(input: ChangeSandboxExpiryDateInput!): ChangeSandboxExpiryDateResult!
+  deactivateSandbox(sandboxId: ID!): DeactivateSandboxResult!
+  deleteSandbox(sandboxId: ID!): DeleteSandboxResult!
+  createSavedChat(input: CreateSavedChatInput!): CreateSavedChatResult!
+  updateSavedChat(input: UpdateSavedChatInput!): UpdateSavedChatResult!
+  deleteSavedChat(input: DeleteSavedChatInput!): DeleteSavedChatResult!
+  createSource(input: CreateSourceInput!): CreateSourceResult!
+  updateSource(input: UpdateSourceInput!): UpdateSourceResult!
+  deleteSource(sourceId: ID!): DeleteSourceResult!
+  addSourceToProject(sourceId: ID!, projectId: ID!): AddSourceToProjectResult!
+  removeSourceFromProject(sourceId: ID!, projectId: ID!): RemoveSourceFromProjectResult!
+}
+
+input EventMetadataInput {
+  integrationId: ID!
+  user: EventUserAttributesInput
+  client: EventClientInput
+  env: Environment
+}
+
+enum Environment {
+  PRODUCTION
+  STAGING
+  DEVELOPMENT
+}
+
+input LogUsageEventInput {
+  eventName: String!
+  metadata: EventMetadataInput!
+  chatProperties: ChatPropertiesInput
+  searchProperties: SearchPropertiesInput
+  eventProperties: JSONObject
+}
+
+type ChatSessionMessage {
+  userMessage: UserMessage
+  botMessage: BotMessage
+}
+
+input ChatSessionMessageInput {
+  userMessage: UserMessageInput
+  botMessage: BotMessageInput
+}
+
+input ChatPropertiesInput {
+  chatSessionAllMessages: [ChatSessionMessageInput!]
+  question: UserMessageInput
+  answer: BotMessageInput
+  chatSessionId: ID
+  chatMode: ChatMode!
+  filters: SearchAndChatFiltersInput
+}
+
+input SearchPropertiesInput {
+  query: String
+  searchMode: SearchMode!
+  filters: SearchAndChatFiltersInput
+}
+
+type LogUsageEventResult {
+  success: Boolean!
+}
+
+input EventUserAttributesInput {
+  userId: String
+  userIdentificationType: UserIdentificationType
+  userType: UserType
+  userToken: String
+  userEmail: String
+  userCohorts: [String!]
+  userCustomAttributes: JSONObject
+}
+
+type EventUserAttributes {
+  userType: UserType!
+  userIdentificationType: UserIdentificationType!
+  userCohorts: [String!]
+  userEmail: String
+  userId: String
+  userCustomAttributes: JSONObject
+}
+
+enum UserType {
+  EXTERNAL
+  INTERNAL
+}
+
+enum UserIdentificationType {
+  ANONYMOUS
+  COOKIED
+  ID_PROVIDED
+  TOKEN
+}
+
+input EventClientInput {
+  inkeepWebWidget: InkeepWebWidgetClientInput
+  slack: SlackClientInput
+  discord: DiscordClientInput
+  custom: JSONObject
+}
+
+input InkeepWebWidgetClientInput {
+  widgetLibraryVersion: String!
+  isModalModeSwitchingEnabled: Boolean!
+  chatModeComponentDefault: ChatMode!
+  isChatModeToggleEnabled: Boolean!
+  chatModeCurrentlySelected: String
+  modalViewComponentDefault: String!
+  modalViewCurrentlySelected: String
+  sharedChatSessionId: String
+  interactionType: WebWidgetInteractionType!
+}
+
+input SlackClientInput {
+  channelId: ID!
+}
+
+input DiscordClientInput {
+  channelId: ID!
+}
+
+interface ChatMessage {
+  id: ID!
+  content: String!
+}
+
+type UserMessage implements ChatMessage {
+  id: ID!
+  content: String!
+}
+
+type BotMessage implements ChatMessage {
+  id: ID!
+  content: String!
+  citations: [ChatCitation!]!
+}
+
+input UserMessageInput {
+  id: ID!
+  content: String!
+}
+
+input BotMessageInput {
+  id: ID!
+  content: String!
+  citations: [ChatCitationInput!]!
+}
+
+input ChatCitationInput {
+  citationNumber: Int
+  title: String
+  url: String!
+  rootRecordId: ID
+}
+
+type AnalyticsEventMetadata {
+  integrationId: ID!
+  user: EventUserAttributes
+  client: EventClient
+  createdAt: DateTime!
+  env: Environment!
+}
+
+input SearchAndChatFiltersInput {
+  product: String
+  productVersion: String
+  sourceIds: [String!]
+  attributes: JSONObject
+}
+
+type SearchAndChatFilters {
+  product: String
+  productVersion: String
+  sourceIds: [String!]
+  attributes: JSONObject
+}
+
+enum ChatMode {
+  TURBO
+  AUTO
+}
+
+enum SearchMode {
+  AUTO
+  INTELLIGENT
+  KEYWORD
+}
+
+interface AnalyticsEvent {
+  id: ID!
+  eventName: String!
+  metadata: AnalyticsEventMetadata!
+  createdAt: DateTime!
+}
+
+type ChatProperties {
+  chatSessionId: ID
+  chatMode: ChatMode!
+  filters: SearchAndChatFilters
+  question: UserMessage
+  answer: BotMessage
+}
+
+type SearchProperties {
+  query: String!
+  searchMode: SearchMode!
+  filters: SearchAndChatFilters
+}
+
+type EventClient {
+  inkeepWebWidget: InkeepWebWidgetClient
+  slack: SlackClient
+  discord: DiscordClient
+  custom: JSONObject
+}
+
+type InkeepWebWidgetClient {
+  widgetLibraryVersion: String!
+  isModalModeSwitchingEnabled: Boolean!
+  chatModeComponentDefault: ChatMode!
+  isChatModeToggleEnabled: Boolean!
+  chatModeCurrentlySelected: String
+  modalViewComponentDefault: String!
+  modalViewCurrentlySelected: String
+  sharedChatSessionId: String
+  interactionType: WebWidgetInteractionType!
+}
+
+enum WebWidgetInteractionType {
+  CHAT_BUTTON
+  CUSTOM_TRIGGER
+  EMBEDDED_CHAT
+  SEARCH_BAR
+}
+
+type SlackClient {
+  channelId: String!
+}
+
+type DiscordClient {
+  channelId: String!
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""A string that cannot be passed as an empty value"""
+scalar NonEmptyString
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type Query {
+  analyticsDashboard(input: AnalyticsDashboardInput): DashboardAccessTokens
+  listChatFeedback(input: ListChatFeedbackInput!): ListChatFeedbackResponse!
+  chatFeedback(id: ID!): ChatFeedback
+  sourceIndex(sourceIndexId: ID!): SourceIndex!
+  indexingJob(indexingJobId: ID!): IndexingJob!
+  integration(integrationId: ID!): Integration!
+  slackBotIntegrationSettings(input: SlackBotIntegrationSettingsInput!): IntegrationRuntimeSlackSettings!
+  discordBotIntegrationSettings(input: DiscordBotIntegrationSettingsInput!): IntegrationRuntimeDiscordSettings!
+  organization: Organization!
+  allOrganizationIds: [String!]!
+  allOrganizationsMetadata: [Organization]!
+  project(projectId: ID!): Project!
+  projectByApiKey(apiKey: String!): Project!
+  allProjects: [Project!]!
+  sandbox(sandboxId: ID!): Sandbox!
+  sandboxRenderSettings(input: SandboxRenderSettingsInput!): SandboxRenderSettings!
+  savedChat(input: QuerySavedChatInput!): SavedChat!
+  source(sourceId: ID!): Source!
+  allSources: [Source!]!
+  user(userId: ID!): User!
+}
+
+input PageInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+type PageInfo {
+  startCursor: String
+  endCursor: String
+}
+
+input AnalyticsDashboardInput {
+  projectId: String
+}
+
+type DashboardAccessTokens {
+  id: ID!
+  dashboardAccessToken: String
+  dataAccessToken: String
+  canViewDashboard: Boolean
+  canEditGlobalDashboard: Boolean
+}
+
+input ListChatFeedbackInput {
+  type: ChatFeedbackType
+  integrationId: ID
+  projectId: ID
+  page: PageInput
+}
+
+type ListChatFeedbackResponse {
+  feedback: [ChatFeedback!]!
+  pageInfo: PageInfo!
+}
+
+enum ChatFeedbackType {
+  POSITIVE
+  NEGATIVE
+}
+
+input RequiredChatPropertiesInput {
+  chatSessionAllMessages: [ChatSessionMessageInput!]!
+  question: UserMessageInput!
+  answer: BotMessageInput!
+  chatSessionId: ID!
+  chatMode: ChatMode!
+  filters: SearchAndChatFiltersInput
+}
+
+input LogChatPositiveFeedbackInput {
+  metadata: EventMetadataInput!
+  chatProperties: RequiredChatPropertiesInput!
+}
+
+input LogChatNegativeFeedbackInput {
+  metadata: EventMetadataInput!
+  chatProperties: RequiredChatPropertiesInput!
+  reasons: NegativeFeedbackReasonsInput
+}
+
+input NegativeFeedbackReasonsInput {
+  inaccurateStatement: Boolean
+  inaccurateStatementDetails: String
+  inaccurateCodeSnippet: Boolean
+  inaccurateCodeSnippetDetails: String
+  irrelevantCitations: Boolean
+  irrelevantCitationsDetails: String
+  unrelatedResponse: Boolean
+  unrelatedResponseDetails: String
+  confusedTerms: Boolean
+  confusedTermsDetails: String
+  riskyAction: Boolean
+  riskyActionDetails: String
+  highlightedUnrelatedIssues: Boolean
+  highlightedUnrelatedIssuesDetails: String
+  suggestedACompetitor: Boolean
+  suggestedACompetitorDetails: String
+  other: Boolean
+  otherDetails: String
+}
+
+type NegativeFeedbackReasons {
+  inaccurateStatement: Boolean
+  inaccurateStatementDetails: String
+  inaccurateCodeSnippet: Boolean
+  inaccurateCodeSnippetDetails: String
+  irrelevantCitations: Boolean
+  irrelevantCitationsDetails: String
+  unrelatedResponse: Boolean
+  unrelatedResponseDetails: String
+  confusedTerms: Boolean
+  confusedTermsDetails: String
+  riskyAction: Boolean
+  riskyActionDetails: String
+  highlightedUnrelatedIssues: Boolean
+  highlightedUnrelatedIssuesDetails: String
+  suggestedACompetitor: Boolean
+  suggestedACompetitorDetails: String
+  other: Boolean
+  otherDetails: String
+}
+
+type LogChatPositiveFeedbackResponse {
+  success: Boolean!
+  positiveFeedback: ChatPositiveFeedback!
+}
+
+type LogChatNegativeFeedbackResponse {
+  success: Boolean!
+  negativeFeedback: ChatNegativeFeedback!
+}
+
+interface ChatFeedback {
+  id: ID!
+  type: ChatFeedbackType!
+  metadata: AnalyticsEventMetadata!
+  chatProperties: ChatProperties!
+  createdAt: DateTime!
+}
+
+type ChatPositiveFeedback implements ChatFeedback {
+  id: ID!
+  type: ChatFeedbackType!
+  metadata: AnalyticsEventMetadata!
+  chatProperties: ChatProperties!
+  createdAt: DateTime!
+}
+
+type ChatNegativeFeedback implements ChatFeedback {
+  id: ID!
+  type: ChatFeedbackType!
+  metadata: AnalyticsEventMetadata!
+  chatProperties: ChatProperties!
+  createdAt: DateTime!
+  reasons: NegativeFeedbackReasons!
+}
+
+type SourceIndex {
+  id: ID!
+  createdAt: DateTime!
+  isEnabled: Boolean!
+  indexingEngine: IndexingEngine!
+  jobHistory: [IndexingJob!]!
+  lastSuccessfulJob: IndexingJob
+  lastJob: IndexingJob
+}
+
+enum IndexingEngine {
+  GENERIC_DOCS
+  GENERIC_PDFS
+  MINTLIFY_DOCS
+  GITHUB_PULL_REQUESTS
+  GITHUB_ISSUES
+  GITHUB_DISCUSSIONS
+  GITHUB_READMES
+  GITHUB_RELEASES
+  STACKOVERFLOW_QUESTIONS
+  DISCOURSE_POSTS
+  DISCORD_MESSAGES
+  DISCORD_FORUM_POSTS
+  SLACK_MESSAGES
+  OPENAPI
+  EVOLVABLE_ENUM_VALUE
+  INKEEP_CUSTOM_QUESTION_ANSWERS
+  INKEEP_REVISED_ANSWERS
+}
+
+type IndexingJob {
+  id: ID!
+  startTime: DateTime!
+  endTime: DateTime
+  status: IndexingJobStatus!
+  statusMessage: String
+}
+
+enum IndexingJobStatus {
+  QUEUED
+  PROCESSING
+  FAILED
+  SUCCESSFUL
+}
+
+input CreateSourceIndexInput {
+  sourceId: ID!
+  sourceIndexId: ID!
+  isEnabled: Boolean!
+  indexingEngine: IndexingEngine!
+  createdAt: DateTime
+  newJob: NewIndexingJobInput
+}
+
+input NewIndexingJobInput {
+  startTime: DateTime!
+  status: IndexingJobStatus!
+  statusMessage: String
+}
+
+type CreateSourceIndexResult {
+  index: SourceIndex!
+  success: Boolean!
+}
+
+input AddIndexingJobInput {
+  indexId: ID!
+  newJob: NewIndexingJobInput!
+}
+
+type AddIndexingJobResult {
+  job: IndexingJob!
+  success: Boolean!
+}
+
+input UpdateIndexingJobInput {
+  indexingJobId: ID!
+  status: IndexingJobStatus
+  statusMessage: String
+  endTime: DateTime
+}
+
+type UpdateIndexingJobResult {
+  job: IndexingJob!
+  success: Boolean!
+}
+
+input UpdateEnabledIndexesForSourceInput {
+  sourceId: ID!
+  indexes: [UpdateIsEnabledForIndex!]!
+}
+
+input UpdateIsEnabledForIndex {
+  indexId: ID!
+  isEnabled: Boolean!
+}
+
+type UpdateEnabledIndexesForSourceResult {
+  indexes: [SourceIndex]!
+  source: Source!
+  success: Boolean!
+}
+
+type DeleteSourceIndexResult {
+  index: SourceIndex!
+  success: Boolean!
+}
+
+interface IntegrationRuntimeSettings {
+  apiKey: String!
+  integrationId: ID!
+  organizationId: ID!
+}
+
+input SlackBotIntegrationSettingsInput {
+  workspaceId: ID!
+  channelId: ID
+}
+
+input DiscordBotIntegrationSettingsInput {
+  serverId: ID!
+}
+
+type IntegrationRuntimeSlackSettings implements IntegrationRuntimeSettings {
+  integrationId: ID!
+  apiKey: String!
+  organizationId: ID!
+  configuration: SlackIntegrationConfiguration
+}
+
+type IntegrationRuntimeDiscordSettings implements IntegrationRuntimeSettings {
+  integrationId: ID!
+  apiKey: String!
+  organizationId: ID!
+  configuration: DiscordIntegrationConfiguration
+}
+
+type UserTokenSettings {
+  verificationKey: String!
+  issuer: String!
+  isRequiredForAccess: Boolean!
+}
+
+type Integration {
+  id: ID!
+  displayName: String!
+  apiKey: String!
+  userTokenSettings: UserTokenSettings
+  url: String
+  isRestricted: Boolean!
+  type: IntegrationType!
+  createdAt: DateTime!
+  configuration: IntegrationConfiguration
+}
+
+enum IntegrationType {
+  INKEEP_PORTAL
+  SHARABLE_SANDBOX
+  WEB
+  SLACK_BOT
+  DISCORD_BOT
+  API
+}
+
+interface IntegrationConfiguration {
+  type: IntegrationType!
+}
+
+type SlackIntegrationConfiguration implements IntegrationConfiguration {
+  type: IntegrationType!
+  workspaceId: String!
+  continueInWebChatUrl: String
+  isDefaultForWorkspace: Boolean
+  enabledForChannels: [String!]
+}
+
+type DiscordIntegrationConfiguration implements IntegrationConfiguration {
+  type: IntegrationType!
+  serverId: String!
+  continueInWebChatUrl: String
+  autoReplyChannels: [String!]!
+}
+
+input CreateUserTokenSettingsInput {
+  verificationKey: String!
+  issuer: String!
+  isRequiredForAccess: Boolean!
+}
+
+input CreateIntegrationInput {
+  projectId: ID!
+  integrationId: ID
+  displayName: String!
+  url: String
+  type: IntegrationType
+  configuration: CreateIntegrationConfiguration
+  userTokenSettings: CreateUserTokenSettingsInput
+}
+
+type CreateIntegrationResult {
+  integration: Integration!
+  success: Boolean!
+}
+
+input CreateIntegrationConfiguration {
+  slackBot: SlackCreateIntegrationConfiguration
+  discordBot: DiscordCreateIntegrationConfiguration
+}
+
+input SlackCreateIntegrationConfiguration {
+  workspaceId: String!
+  continueInWebChatUrl: String
+  isDefaultForWorkspace: Boolean
+  enabledForChannels: [String!]
+}
+
+input DiscordCreateIntegrationConfiguration {
+  serverId: String!
+  continueInWebChatUrl: String
+  autoReplyChannels: [String!]
+}
+
+input UpdateIntegrationInput {
+  integrationId: ID!
+  displayName: String
+  url: String
+  userTokenSettings: UpdateUserTokenSettingsInput
+  configuration: UpdateIntegrationConfiguration
+}
+
+input UpdateUserTokenSettingsInput {
+  verificationKey: String
+  issuer: String
+  isRequiredForAccess: Boolean
+}
+
+input UpdateIntegrationConfiguration {
+  slackBot: SlackUpdateIntegrationConfiguration
+  discordBot: DiscordUpdateIntegrationConfiguration
+}
+
+input SlackUpdateIntegrationConfiguration {
+  workspaceId: String
+  continueInWebChatUrl: String
+  isDefaultForWorkspace: Boolean
+  enabledForChannels: [String!]
+}
+
+input DiscordUpdateIntegrationConfiguration {
+  serverId: String
+  continueInWebChatUrl: String
+  autoReplyChannels: [String!]
+}
+
+type UpdateIntegrationResult {
+  integration: Integration!
+  success: Boolean!
+}
+
+type RegenerateIntegrationApiKeyResult {
+  apiKey: String!
+  integration: Integration!
+  success: Boolean!
+}
+
+type DeleteIntegrationResult {
+  integration: Integration!
+  success: Boolean!
+}
+
+type RevisedAnswersSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  revisedAnswers: [RevisedAnswer!]!
+  createdAt: DateTime!
+  defaultForProject: Project
+  isRestricted: Boolean!
+}
+
+type CustomQuestionAnswersSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  questionAnswers: [CustomQuestionAnswer!]!
+  createdAt: DateTime!
+  defaultForProject: Project
+  isRestricted: Boolean!
+  isTunedByInkeep: Boolean!
+}
+
+interface ManagedQuestionAnswer {
+  id: ID!
+  createdAt: DateTime!
+  editedAt: DateTime
+  isEnabled: Boolean!
+  question: UserMessage!
+  answer: UserAnswer!
+}
+
+type RevisedAnswer implements ManagedQuestionAnswer {
+  id: ID!
+  createdAt: DateTime!
+  editedAt: DateTime
+  isEnabled: Boolean!
+  question: UserMessage!
+  answer: UserAnswer!
+  originalAnswer: BotMessage!
+  chatSessionId: String!
+}
+
+type UserAnswer implements ChatMessage {
+  id: ID!
+  content: String!
+  citations: [ChatCitation!]!
+}
+
+type CustomQuestionAnswer implements ManagedQuestionAnswer {
+  id: ID!
+  createdAt: DateTime!
+  editedAt: DateTime
+  isEnabled: Boolean!
+  question: UserMessage!
+  answer: UserAnswer!
+}
+
+type ChatCitation {
+  citationNumber: Int
+  url: String!
+  title: String
+  rootRecordId: ID
+}
+
+input CreateCustomQuestionAnswerInput {
+  sourceId: ID!
+  question: UserQuestionInput!
+  answer: UserAnswerInput!
+  isEnabled: Boolean!
+  createdAt: DateTime
+}
+
+input UserQuestionInput {
+  content: String!
+}
+
+input UserAnswerInput {
+  content: String!
+  citations: [ChatCitationInput!]
+}
+
+type CreateCustomQuestionAnswerResult {
+  customQuestionAnswer: CustomQuestionAnswer!
+  success: Boolean!
+}
+
+input UpdateCustomQuestionAnswerInput {
+  customQuestionAnswerId: ID!
+  question: UserQuestionInput
+  answer: UserAnswerInput
+  isEnabled: Boolean
+}
+
+type UpdateCustomQuestionAnswerResult {
+  customQuestionAnswer: CustomQuestionAnswer!
+  success: Boolean!
+}
+
+type DeleteCustomQuestionAnswerResult {
+  customQuestionAnswer: CustomQuestionAnswer!
+  success: Boolean!
+}
+
+input SubmitRevisedAnswerInput {
+  chatSessionId: String!
+  question: UserMessageInput!
+  answer: UserAnswerInput!
+  originalAnswer: BotMessageInput!
+  chatMode: ChatMode!
+  createdAt: DateTime
+}
+
+type SubmitRevisedAnswerResult {
+  revisedAnswer: RevisedAnswer!
+  success: Boolean!
+}
+
+input UpdateRevisedAnswerInput {
+  revisedAnswerId: ID!
+  answer: UserAnswerInput!
+}
+
+type UpdateRevisedAnswerResult {
+  revisedAnswer: RevisedAnswer!
+  success: Boolean!
+}
+
+type DeleteRevisedAnswerResult {
+  revisedAnswer: RevisedAnswer!
+  success: Boolean!
+}
+
+type Organization {
+  id: ID!
+  alias: ID!
+  displayName: String!
+  users: [User!]!
+  projects: [Project!]!
+  portalDisplayPreferences: PortalDisplayPreferences!
+  sources: [Source!]!
+  status: OrganizationStatus!
+}
+
+enum OrganizationStatus {
+  INACTIVE
+  DEMO
+  PROSPECT
+  CUSTOMER
+}
+
+input CreateOrganizationInput {
+  alias: String!
+  displayName: String!
+  portalDisplayPreferences: PortalDisplayPreferencesInput!
+}
+
+type PortalDisplayPreferences {
+  id: ID!
+  primaryBrandColor: String
+  defaultColorMode: ColorMode
+  defaultProject: Project
+  botAvatarSrcUrl: String
+  botAvatarDarkSrcUrl: String
+}
+
+input PortalDisplayPreferencesInput {
+  primaryBrandColor: String
+  defaultColorMode: ColorMode
+  botAvatarSrcUrl: String
+  botAvatarDarkSrcUrl: String
+}
+
+enum ColorMode {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+type CreateOrganizationResult {
+  organization: Organization!
+  success: Boolean!
+}
+
+input UpdateOrganizationInput {
+  displayName: String
+  portalDisplayPreferences: PortalDisplayPreferencesInput
+}
+
+type UpdateOrganizationResult {
+  organization: Organization!
+  success: Boolean!
+}
+
+input UploadOrganizationIconInput {
+  file: Upload!
+  isDark: Boolean
+}
+
+type UploadOrganizationIconResult {
+  url: String!
+  organization: Organization!
+  success: Boolean!
+}
+
+enum RoleOption {
+  ORGANIZATION_ADMINISTRATOR
+  ORGANIZATION_MEMBER
+}
+
+input InviteMemberToOrganizationInput {
+  invitee: String!
+  roles: [RoleOption!]!
+}
+
+type InviteMemberToOrganizationResult {
+  success: Boolean!
+}
+
+type Project {
+  id: ID!
+  displayName: String!
+  integrations: [Integration!]!
+  sources: [Source!]!
+  context: [String!]!
+  createdAt: DateTime!
+  oneLineDescription: String
+  chatSubjectName: String
+  sandboxes: [Sandbox!]!
+  defaultRevisedAnswersSource: RevisedAnswersSource
+  defaultCustomQuestionAnswersSource: CustomQuestionAnswersSource
+}
+
+input CreateProjectInput {
+  displayName: String!
+  projectId: ID
+  chatSubjectName: String
+  oneLineDescription: String
+  createTuningSources: Boolean
+}
+
+type CreateProjectResult {
+  project: Project!
+  success: Boolean!
+}
+
+input UpdateProjectInput {
+  projectId: ID!
+  displayName: String
+  chatSubjectName: String
+  oneLineDescription: String
+}
+
+type UpdateProjectResult {
+  project: Project!
+  success: Boolean!
+}
+
+type DeleteProjectResult {
+  project: Project!
+  success: Boolean!
+}
+
+input SetDefaultProjectForUserInput {
+  projectId: ID
+}
+
+type SetDefaultProjectForUserResult {
+  user: User!
+  project: Project
+  success: Boolean!
+}
+
+input SetDefaultProjectForOrganizationInput {
+  projectId: ID
+}
+
+type SetDefaultProjectForOrganizationResult {
+  organization: Organization!
+  project: Project
+  success: Boolean!
+}
+
+type Sandbox {
+  id: ID!
+  displayName: String!
+  type: SandboxType!
+  createdAt: DateTime!
+  expiresAt: DateTime
+  isDeactivated: Boolean!
+  isDeactivatedReason: String
+  isTrial: Boolean!
+  hasNoBranding: Boolean!
+  author: User
+}
+
+input SandboxRenderSettingsInput {
+  sandboxId: ID!
+  organizationAlias: ID!
+}
+
+type SandboxRenderSettings {
+  id: ID!
+  displayName: String!
+  type: SandboxType!
+  expiresAt: DateTime
+  widgetSettings: SandboxWidgetSettings
+  isDeactivated: Boolean!
+  isDeactivatedReason: String
+  hasNoBranding: Boolean!
+  url: String!
+}
+
+type SandboxWidgetSettings implements IntegrationRuntimeSettings {
+  integrationId: ID!
+  apiKey: String!
+  organizationId: ID!
+  organizationDisplayName: String!
+  chatSubjectName: String
+  organizationPortalDisplayPreferences: PortalDisplayPreferences!
+}
+
+enum SandboxType {
+  DEMO
+  CHAT
+  SEARCH_AND_CHAT
+}
+
+input CreateSandboxInput {
+  projectId: ID!
+  type: SandboxType!
+  displayName: String!
+  isTrial: Boolean
+  expiresAt: DateTime
+  hasNoBranding: Boolean
+}
+
+type CreateSandboxResult {
+  sandbox: Sandbox!
+  success: Boolean!
+}
+
+input ChangeSandboxExpiryDateInput {
+  sandboxId: ID!
+  newExpiryDate: DateTime!
+}
+
+type ChangeSandboxExpiryDateResult {
+  sandbox: Sandbox!
+  success: Boolean!
+}
+
+type DeleteSandboxResult {
+  sandbox: Sandbox!
+  success: Boolean!
+}
+
+type DeactivateSandboxResult {
+  sandbox: Sandbox!
+  success: Boolean!
+}
+
+input QuerySavedChatInput {
+  chatSessionId: ID!
+}
+
+input CreateSavedChatInput {
+  chatSessionId: ID!
+  title: String!
+}
+
+input UpdateSavedChatInput {
+  chatSessionId: ID!
+  title: String
+  lastMessageAt: DateTime
+}
+
+input DeleteSavedChatInput {
+  chatSessionId: ID!
+}
+
+type CreateSavedChatResult {
+  success: Boolean!
+  savedChat: SavedChat!
+}
+
+type UpdateSavedChatResult {
+  success: Boolean!
+  savedChat: SavedChat!
+}
+
+type DeleteSavedChatResult {
+  success: Boolean!
+  savedChat: SavedChat!
+}
+
+type SavedChat {
+  chatSessionId: ID!
+  title: String!
+  createdAt: DateTime!
+  lastMessageAt: DateTime!
+  userId: ID!
+}
+
+interface Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  createdAt: DateTime!
+  indexes: [SourceIndex!]!
+  isRestricted: Boolean!
+}
+
+type CustomIndexesSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input CustomIndexesCreateSourceConfiguration {
+  displayName: String!
+  sourceId: ID
+  isDocumentation: Boolean
+  isOwnedByOrganization: Boolean!
+}
+
+input CustomIndexesUpdateSourceConfiguration {
+  displayName: String
+  isOwnedByOrganization: Boolean!
+  isDocumentation: Boolean
+}
+
+type DiscourseSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  url: String!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input DiscourseCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+}
+
+input DiscourseUpdateSourceConfiguration {
+  displayName: String
+}
+
+type GitHubSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  owner: String!
+  repo: String!
+  url: String!
+  includeDiscussions: Boolean
+  includePullRequests: Boolean
+  includeREADMEs: Boolean
+  includeIssues: Boolean
+  includeReleaseNotes: Boolean
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input GitHubCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+  includeDiscussions: Boolean
+  includePullRequests: Boolean
+  includeREADMEs: Boolean
+  includeIssues: Boolean
+  includeReleaseNotes: Boolean
+  isAutoRefreshEnabled: Boolean
+}
+
+input GitHubUpdateSourceConfiguration {
+  displayName: String
+  includeDiscussions: Boolean
+  includePullRequests: Boolean
+  includeREADMEs: Boolean
+  includeIssues: Boolean
+  includeReleaseNotes: Boolean
+  isAutoRefreshEnabled: Boolean
+}
+
+type StackOverflowSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  tags: [String!]!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input StackOverflowCreateSourceConfiguration {
+  displayName: String!
+  tags: [String!]!
+  isAutoRefreshEnabled: Boolean
+}
+
+input StackOverflowUpdateSourceConfiguration {
+  displayName: String
+  tags: [String!]
+  isAutoRefreshEnabled: Boolean
+}
+
+input RevisedAnswersCreateSourceConfiguration {
+  displayName: String!
+}
+
+input CustomQuestionAnswersCreateSourceConfiguration {
+  displayName: String!
+}
+
+input RevisedAnswersUpdateSourceConfiguration {
+  displayName: String
+}
+
+input CustomQuestionAnswersUpdateSourceConfiguration {
+  displayName: String
+}
+
+type GeneralWebSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  createdAt: DateTime!
+  ingestUrls: [String!]
+  crawlerSitemapUrls: [String!]
+  crawlerStartUrls: [String!]
+  urlMatchingPatterns: UrlMatchingPatternsResult
+  indexes: [SourceIndex!]!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+type IngestionMatchingPatterns {
+  excludePatterns: [UrlMatchPattern!]!
+  includePatterns: [UrlMatchPattern!]!
+}
+
+type UrlMatchPattern {
+  matchType: UrlMatchType!
+  pattern: String!
+}
+
+enum UrlMatchType {
+  REGEX
+  EXACT
+}
+
+input UrlMatchPatternInput {
+  matchType: UrlMatchType!
+  pattern: String!
+}
+
+input UrlMatchingPatternsInput {
+  excludePatterns: [UrlMatchPatternInput!]
+  includePatterns: [UrlMatchPatternInput!]
+}
+
+type UrlMatchingPatternsResult {
+  excludePatterns: [UrlMatchPattern!]
+  includePatterns: [UrlMatchPattern!]
+}
+
+input GeneralWebCreateSourceConfiguration {
+  displayName: String!
+  ingestUrls: [String!]
+  crawlerSitemapUrls: [String!]
+  crawlerStartUrls: [String!]
+  urlMatchingPatterns: UrlMatchingPatternsInput
+  isDocumentation: Boolean
+  isAutoRefreshEnabled: Boolean
+}
+
+input GeneralWebUpdateSourceConfiguration {
+  displayName: String!
+  ingestUrls: [String!]
+  crawlerSitemapUrls: [String!]
+  crawlerStartUrls: [String!]
+  urlMatchingPatterns: UrlMatchingPatternsInput
+  isDocumentation: Boolean
+  isAutoRefreshEnabled: Boolean
+}
+
+type DiscordSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  serverId: String!
+  channelIds: [String!]!
+  teamMemberRoles: [String!]!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input DiscordCreateSourceConfiguration {
+  displayName: String!
+  serverId: String!
+  channelIds: [String!]!
+  teamMemberRoles: [String!]
+  isAutoRefreshEnabled: Boolean
+}
+
+input DiscordUpdateSourceConfiguration {
+  displayName: String!
+  serverId: String
+  channelIds: [String!]
+  teamMemberRoles: [String!]
+  isAutoRefreshEnabled: Boolean
+}
+
+type SlackSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  workspaceId: String!
+  isDefaultForWorkspace: Boolean!
+  channelIds: [String!]!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input SlackCreateSourceConfiguration {
+  displayName: String!
+  workspaceId: String!
+  isDefaultForWorkspace: Boolean
+  channelIds: [String!]
+  isAutoRefreshEnabled: Boolean
+}
+
+input SlackUpdateSourceConfiguration {
+  displayName: String
+  workspaceId: String
+  isDefaultForWorkspace: Boolean
+  channelIds: [String!]
+  isAutoRefreshEnabled: Boolean
+}
+
+type ZendeskSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  helpCenterUrl: String!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input ZendeskCreateSourceConfiguration {
+  displayName: String!
+  helpCenterUrl: String!
+  isAutoRefreshEnabled: Boolean
+}
+
+input ZendeskUpdateSourceConfiguration {
+  displayName: String
+  helpCenterUrl: String
+  isAutoRefreshEnabled: Boolean
+}
+
+type DocusaurusSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  url: String!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input DocusaurusCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+  isAutoRefreshEnabled: Boolean
+}
+
+input DocusaurusUpdateSourceConfiguration {
+  displayName: String
+  url: String
+  isAutoRefreshEnabled: Boolean
+}
+
+type GitbookSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  url: String!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input GitbookCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+  isAutoRefreshEnabled: Boolean
+}
+
+input GitbookUpdateSourceConfiguration {
+  displayName: String
+  url: String
+  isAutoRefreshEnabled: Boolean
+}
+
+type ReadmeSource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  url: String!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input ReadmeCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+  isAutoRefreshEnabled: Boolean
+}
+
+input ReadmeUpdateSourceConfiguration {
+  displayName: String
+  url: String
+  isAutoRefreshEnabled: Boolean
+}
+
+type RedoclySource implements Source {
+  id: ID!
+  isHidden: Boolean!
+  isOwnedByOrganization: Boolean!
+  displayName: String!
+  indexes: [SourceIndex!]!
+  createdAt: DateTime!
+  url: String!
+  isDocumentation: Boolean!
+  isAutoRefreshEnabled: Boolean!
+  isRestricted: Boolean!
+}
+
+input RedoclyCreateSourceConfiguration {
+  displayName: String!
+  url: String!
+  isAutoRefreshEnabled: Boolean
+}
+
+input RedoclyUpdateSourceConfiguration {
+  displayName: String
+  url: String
+  isAutoRefreshEnabled: Boolean
+}
+
+input CreateSourceInput {
+  configuration: CreateSourceConfiguration!
+  addToProjectId: ID
+}
+
+input CreateSourceConfiguration {
+  customIndexes: CustomIndexesCreateSourceConfiguration
+  discourse: DiscourseCreateSourceConfiguration
+  github: GitHubCreateSourceConfiguration
+  stackoverflow: StackOverflowCreateSourceConfiguration
+  customQuestionAnswers: CustomQuestionAnswersCreateSourceConfiguration
+  revisedAnswers: RevisedAnswersCreateSourceConfiguration
+  generalWeb: GeneralWebCreateSourceConfiguration
+  slack: SlackCreateSourceConfiguration
+  discord: DiscordCreateSourceConfiguration
+  docusaurus: DocusaurusCreateSourceConfiguration
+  gitbook: GitbookCreateSourceConfiguration
+  readme: ReadmeCreateSourceConfiguration
+  redocly: RedoclyCreateSourceConfiguration
+  zendesk: ZendeskCreateSourceConfiguration
+}
+
+type CreateSourceResult {
+  source: Source!
+  project: Project
+  success: Boolean!
+}
+
+input UpdateSourceInput {
+  sourceId: ID!
+  configuration: UpdateSourceConfiguration!
+}
+
+input UpdateSourceConfiguration {
+  customIndexes: CustomIndexesUpdateSourceConfiguration
+  discourse: DiscourseUpdateSourceConfiguration
+  github: GitHubUpdateSourceConfiguration
+  stackoverflow: StackOverflowUpdateSourceConfiguration
+  customQuestionAnswers: CustomQuestionAnswersUpdateSourceConfiguration
+  revisedAnswers: RevisedAnswersUpdateSourceConfiguration
+  slack: SlackUpdateSourceConfiguration
+  discord: DiscordUpdateSourceConfiguration
+  generalWeb: GeneralWebUpdateSourceConfiguration
+  docusaurus: DocusaurusCreateSourceConfiguration
+  gitbook: GitbookCreateSourceConfiguration
+  readme: ReadmeCreateSourceConfiguration
+  redocly: RedoclyCreateSourceConfiguration
+  zendesk: ZendeskUpdateSourceConfiguration
+}
+
+type UpdateSourceResult {
+  source: Source!
+  success: Boolean!
+}
+
+type DeleteSourceResult {
+  source: Source!
+  success: Boolean!
+}
+
+type AddSourceToProjectResult {
+  project: Project!
+  source: Source!
+  success: Boolean!
+}
+
+type RemoveSourceFromProjectResult {
+  project: Project!
+  source: Source!
+  success: Boolean!
+}
+
+type User {
+  id: ID!
+  organization: Organization
+  givenName: String
+  familyName: String
+  name: String
+  email: String
+  emailVerified: Boolean
+  nickname: String
+  phoneNumber: String
+  phoneNumberVerified: Boolean
+  createdAt: DateTime!
+  savedChats: [SavedChat!]!
+  defaultProject: Project
+  permissions: [String!]!
+}
