@@ -15,11 +15,9 @@
     "xregexp": "^5.1.1"
   },
   "dependencies": {
-    "@inkeep/ai-api": "^0.6.1",
-    "@urql/core": "^4.1.1",
+    "@inkeep/ai-api": "^0.6.2",
     "dotenv": "^16.3.1",
-    "fast-csv": "^4.3.6",
-    "ws": "^8.13.0",
+    "fast-csv": "^5.0.1",
     "zod": "^3.22.4"
   },
   "scripts": {
@@ -27,6 +25,6 @@
     "build": "tsc",
     "start": "node dist/src/main.js",
     "inkeep-chat-api-codegen": "graphql-codegen --config inkeep-chat-api-codegen.ts",
-    "inkeep-generate-sdl": "ts-node utils/generateInkeepGraphQLSdl.ts api.management.inkeep.com"
+    "inkeep-generate-sdl": "ts-node utils/generateInkeepGraphQLSdl.ts api.inkeep.com"
   }
 }
