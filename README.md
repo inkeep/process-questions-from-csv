@@ -8,15 +8,14 @@ The format of the input csv should be:
 
 ```
 question
-"<question1>"
-"<question2>"
+"How do I get started?"
 ```
 
 Quotes are needed in order to keep valid CSV format.
 
 The file name of the output csv will be:
 
-`./outputs/output_${count}_${timestamp}.csv`
+`./outputs/integration_${integrationId}-count_${count}-time_${timestamp}.csv`
 
 Format of the output file will be:
 
@@ -26,6 +25,8 @@ question,answer,view_chat_url
 ```
 
 You can view the chat response in the web view by using the given url.
+
+If you provide a `SHARE_URL_BASE_PATH`, you'll get a link to a sandbox that shows all questions asked in the batch.
 
 You can also view all the questions in the Inkeep Dashboard. By providing a tag in the config, you can filter by that Tag in the Inkeep Admin UX to view all the questions, including positive or negative feedback, for that tag.
 
