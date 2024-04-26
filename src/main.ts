@@ -1,15 +1,15 @@
-import { processFromCSV } from './processCSV';
+import { processCSV } from './processCSV';
 import dotenv from 'dotenv';
-import { envServerSchema } from "./serverEnvSchema";
+import { env } from "./env";
 
 dotenv.config();
 
-const filePath = envServerSchema.FILE_PATH;
-const shareUrlBasePath = envServerSchema.SHARE_URL_BASE_PATH;
+const filePath = env.FILE_PATH;
+const shareUrlBasePath = env.SHARE_URL_BASE_PATH;
 
 (async () => {
     try {
-        await processFromCSV(filePath, shareUrlBasePath);
+        await processCSV(filePath, shareUrlBasePath);
     } catch (error) {
         console.error('An error occurred during processing:', error);
     }
