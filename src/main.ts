@@ -1,19 +1,15 @@
-import { processFromCSV } from './processCSV';
+import { processCSV } from './processCSV';
 import dotenv from 'dotenv';
+import { env } from "./env";
 
 dotenv.config();
 
-
-if (!process.env.FILE_PATH || !process.env.SHARE_URL_BASE_PATH) {
-  throw new Error("Environment variables FILE_PATH and/or SHARE_URL_BASE_PATH are not defined.");
-}
-
-const filePath = process.env.FILE_PATH;
-const shareUrlBasePath = process.env.SHARE_URL_BASE_PATH;
+const filePath = env.FILE_PATH;
+const shareUrlBasePath = env.SHARE_URL_BASE_PATH;
 
 (async () => {
     try {
-        await processFromCSV(filePath, shareUrlBasePath);
+        await processCSV(filePath, shareUrlBasePath);
     } catch (error) {
         console.error('An error occurred during processing:', error);
     }
