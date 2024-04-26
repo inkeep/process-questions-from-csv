@@ -32,7 +32,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
 ## Requirements
 
 - Node.js (v14+)
-- npn (or yarn/pnpm/bun equivalents)
+- npm (or yarn/pnpm/bun equivalents)
 
 ## Getting Started
 
@@ -56,16 +56,16 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
    Make sure to create a `.env` file at the root of the project and define the following variables:
 
    ```env
-    INKEEP_ORGANIZATION_ID=<your-organization-id>
-    INKEEP_INTEGRATION_ID=<your-integration-id>
-    INKEEP_API_KEY=<your-api-key-id>
-    FILE_PATH=inputs/<filename>.csv
-    SHARE_URL_BASE_PATH=https://share.inkeep.com/<orgAlias>/<sandboxId>
-    CHAT_MODE=AUTO
-    TAGS=123456789,234567891
+   INKEEP_API_KEY={apiKey}
+   INKEEP_INTEGRATION_ID={integrationId}
+   FILE_PATH=inputs/questions.csv
+   SHARE_URL_BASE_PATH=https://share.inkeep.com/{orgName}/{sandboxId}
+   TAGS=testing-1
+   CHAT_MODE=AUTO
+   BATCH_SIZE=2
    ```
 
-See the `env.sample` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
+See the `.env.example` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
 
 4. Run the script
 
@@ -73,5 +73,4 @@ See the `env.sample` for a template. You can provide a value in `TAGS` so that t
 npm start
 ```
 
-Note: the questions are batched in a batch size of three to protect our service. This might mean the process takes some time depending on the number of questions you have.
-Let us know at help@inkeep.com that you plan to these batch tests so we can allow-list your org.
+Note: the questions are batched in a batch size of two to not get throttled by our service. This might mean the process takes some time depending on the number of questions you have. If you need higher throughput, contact our team.
