@@ -57,7 +57,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
 
    ```env
     INKEEP_API_KEY=<your-api-key-id>
-    FILE_PATH=inputs/<filename>.csv
+    FILE_PATH=inputs/questions.csv
     SHARE_URL_BASE_PATH=https://share.inkeep.com/<orgAlias>/<sandboxId>
     TAGS=123456789,234567891
    ```
