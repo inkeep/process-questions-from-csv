@@ -67,11 +67,13 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
 
 See the `env.sample` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
 
-4. Run the script
+5. **Run the script**
 
 ```
 npm start
 ```
+
+The `npm start` command will automatically compile the TypeScript code and then run the script. No need to run a separate build step.
 
 Note: the questions are batched in a batch size of three to protect our service. This might mean the process takes some time depending on the number of questions you have.
 Let us know at help@inkeep.com that you plan to these batch tests so we can allow-list your org.
