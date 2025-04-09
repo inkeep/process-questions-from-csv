@@ -31,7 +31,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
 
 ## Requirements
 
-- Node.js (v14+)
+- Node.js (v20+)
 - npn (or yarn/pnpm/bun equivalents)
 
 ## Getting Started

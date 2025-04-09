@@ -7,6 +7,9 @@
   "author": "Me",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.4.2",
     "node-fetch-commonjs": "^3.3.1",
