@@ -1,4 +1,4 @@
-# Quick Start Guide for Inkeep Search and Chat API
+# Bulk process questions on Inkeep for evaluation
 
 This repo is a sample of how to batch process questions from a CSV into an output csv.
 
@@ -31,7 +31,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
 
 ## Requirements
 
-- Node.js (v14+)
+- Node.js (v20+)
 - npn (or yarn/pnpm/bun equivalents)
 
 ## Getting Started
@@ -50,28 +50,27 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
    ```
 
 3. **Add your questions**
-   Put your questions CSV in inputs/questions.csv
+   Put your questions CSV in inputs/questions.csv. A sample file is provided at `/inputs/questions.csv` for reference.
 
 4. **Configure Environment Variables**
    Make sure to create a `.env` file at the root of the project and define the following variables:
 
    ```env
-    INKEEP_ORGANIZATION_ID=<your-organization-id>
-    INKEEP_INTEGRATION_ID=<your-integration-id>
     INKEEP_API_KEY=<your-api-key-id>
     FILE_PATH=inputs/<filename>.csv
     SHARE_URL_BASE_PATH=https://share.inkeep.com/<orgAlias>/<sandboxId>
-    CHAT_MODE=AUTO
     TAGS=123456789,234567891
    ```
 
-See the `env.sample` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
+See the `env.example` for a template. You can provide a value in `TAGS` so that the questions and resulting analytics (including thumbs up/down) are grouped together in our dashboard.
 
-4. Run the script
+5. **Run the script**
 
 ```
 npm start
 ```
+
+The `npm start` command will automatically compile the TypeScript code and then run the script. No need to run a separate build step.
 
 Note: the questions are batched in a batch size of three to protect our service. This might mean the process takes some time depending on the number of questions you have.
 Let us know at help@inkeep.com that you plan to these batch tests so we can allow-list your org.

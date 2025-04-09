@@ -7,7 +7,11 @@
   "author": "Me",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^20.4.2",
     "node-fetch-commonjs": "^3.3.1",
     "ts-node": "^10.9.1",
@@ -16,14 +20,16 @@
   },
   "dependencies": {
     "@inkeep/ai-api": "^0.7.2",
+    "@inkeep/inkeep-analytics": "0.2.4-alpha.21",
     "dotenv": "^16.3.1",
     "fast-csv": "^5.0.1",
+    "openai": "^4.28.0",
     "zod": "^3.22.4"
   },
   "scripts": {
     "dev": "ts-node src/main.ts",
     "build": "tsc",
-    "start": "node dist/main.js",
+    "start": "npm run build && node dist/main.js",
     "inkeep-chat-api-codegen": "graphql-codegen --config inkeep-chat-api-codegen.ts",
     "inkeep-generate-sdl": "ts-node utils/generateInkeepGraphQLSdl.ts api.inkeep.com"
   }
