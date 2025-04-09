@@ -2,13 +2,28 @@ import * as fastcsv from "fast-csv";
 import fs, { promises as fsPromises } from "node:fs";
 import { removeCitations } from "./stripCitations";
 import { env } from "./env";
-import { InkeepAI } from "@inkeep/ai-api";
-import { InkeepAnalytics } from "@inkeep/inkeep-analytics/dist/commonjs/sdk/sdk";
+import OpenAI from 'openai';
+import { InkeepAnalytics } from "@inkeep/inkeep-analytics";
 
 const BATCH_SIZE = env.BATCH_SIZE || 2;
 const CONSECUTIVE_FAILURE_THRESHOLD = 2;
 
+// Initialize OpenAI client
+const client = new OpenAI({
+  baseURL: 'https://api.inkeep.com/v1/',
+  apiKey: env.INKEEP_API_KEY,
+});
+
+const getLogger = (name: string) => {
+  return {
+    info: (...data: unknown[]): void => console.info(name, ...data),
+    error: (...data: unknown[]): void => console.error(name, ...data),
+    log: (...data: unknown[]): void => console.log(name, ...data)
+  };
+};
+
 const readCSV = (path: string): Promise<string[]> => {
+  const readLogger = getLogger('[readCSV]');
   return new Promise((resolve, reject) => {
     const questions: string[] = [];
     fastcsv
@@ -17,7 +32,7 @@ const readCSV = (path: string): Promise<string[]> => {
         questions.push(row.question);
       })
       .on("end", (rowCount: number) => {
-        console.log(`Parsed ${rowCount} rows`);
+        readLogger.info(`Parsed ${rowCount} rows`);
         resolve(questions);
       })
       .on("error", (error) => reject(error));
@@ -29,50 +44,57 @@ const getTags = (): string[] => {
   return tags.split(",");
 };
 
+interface ProcessResult {
+  question: string;
+  answer: string;
+  view_chat_url: string;
+}
+
 const processBatch = async (
   batch: string[],
   shareUrlBasePath: string,
-  currentCount: number
-) => {
+  initialCount: number
+): Promise<{
+  results: ProcessResult[];
+  failureCount: number;
+  currentCount: number;
+}> => {
   let failureCount = 0;
-  const promises = batch.map(async (question) => {
+  const startingCount = initialCount;
+  
+  const promises = batch.map(async (question, index) => {
+    const indexLogger = getLogger(`[${index + 1}]`);
     try {
+      ;
       const tags = getTags();
-      const sdk = new InkeepAI({
-        apiKey: env.INKEEP_API_KEY,
-      });
       const analytics = new InkeepAnalytics();
 
-      const res = await sdk.chatSession.create({
-        chatSession: {
-          messages: [
-            {
-              content: question,
-              role: "user",
-            },
-          ],
-          tags: tags,
-        },
-        chatMode: env.CHAT_MODE,
-        integrationId: env.INKEEP_INTEGRATION_ID,
+      const res = await client.chat.completions.create({
+        model: 'inkeep-qa-expert',
+        messages: [{ role: 'user', content: question }],
         stream: false,
       });
 
-      const chatResult = res.chatResult!;
-
-      const answer = removeCitations(chatResult.message.content || "").replace(
+      // Get the content from the response
+      const content = res.choices[0]?.message?.content ?? "";
+      const chatSessionId = res.id;
+      const chatSessionLogger = getLogger(`[${chatSessionId}]`);
+      const answer = removeCitations(content).replace(
         /"/g,
-        '""' // for csv compatability
+        '""' // for csv compatibility
       );
-      const tagsQueryParam = tags ? `&tags=${tags.join(",")}` : "";
-      const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatSessionId}${tagsQueryParam}`;
+      
+      const tagsQueryParam = tags.length ? `&tags=${tags.join(",")}` : "";
+      const view_chat_url = `${shareUrlBasePath}?conversationId=${chatSessionId}${tagsQueryParam}`;
 
-
-      await analytics.conversations.log( {
+      chatSessionLogger.info("got response for chat");
+      await analytics.conversations.log({
         apiIntegrationKey: env.INKEEP_API_KEY,
       },
       {
+        id: chatSessionId,
         type: "openai",
+        visibility: "public",
         messages: [
           {
             role: "user",
@@ -83,44 +105,51 @@ const processBatch = async (
             content: answer,
           },
         ],
-
       });
 
+      chatSessionLogger.info("logged chat");
       return { question, answer, view_chat_url };
     } catch (error) {
-      console.error("Error processing chat:", error);
+      indexLogger.error("Error processing chat:", error);
       failureCount++;
       return null;
     }
   });
 
-  const results = (await Promise.all(promises)).filter((r) => r !== null) as {
-    question: string;
-    answer: string;
-    view_chat_url: string;
-  }[];
+  const results = (await Promise.all(promises)).filter((r) => r !== null) as ProcessResult[];
 
-  for (const result of results) {
-    console.log(`${currentCount}. ${result.view_chat_url}`);
-    currentCount++;
-  }
+  // Display chat URLs with incrementing numbers
+  results.forEach((result, index) => {
+    getLogger('').info(`${startingCount + index}. ${result.view_chat_url}`);
+  });
 
-  return { results, failureCount, currentCount };
+  // Calculate the new count after processing this batch
+  const newCount = startingCount + results.length;
+
+  return { 
+    results, 
+    failureCount, 
+    currentCount: newCount 
+  };
 };
 
-const writeOutputToCSV = async (outputData: any[], count: number, shareUrlBasePath: string) => {
+const writeOutputToCSV = async (
+  outputData: ProcessResult[], 
+  count: number, 
+  shareUrlBasePath: string
+) => {
   const timestamp = Date.now();
   const outputPath = `./outputs/integration_${env.INKEEP_INTEGRATION_ID}-count_${count}-time_${timestamp}.csv`;
-
+  const outputLogger = getLogger('[output]');
   await fsPromises.mkdir("./outputs", { recursive: true });
 
   fastcsv
     .write(outputData, { headers: true })
     .pipe(fs.createWriteStream(outputPath))
     .on("finish", () => {
-      console.log("--Finished processing--");
-      console.log(`Output written to ${outputPath}`);
-      console.log(`Sandbox found at: ${shareUrlBasePath}?tags=${encodeURIComponent(getTags().join(","))}`);
+      outputLogger.info("--Finished processing--");
+      outputLogger.info(`Output written to ${outputPath}`);
+      outputLogger.info(`Sandbox found at: ${shareUrlBasePath}?tags=${encodeURIComponent(getTags().join(","))}`);
     });
 };
 
@@ -130,11 +159,11 @@ export const processCSV = async (
 ) => {
   let questions = await readCSV(filePath);
   questions = questions.reverse(); // so that the sandbox shows in same order as csv
-
-  console.log(`Processing ${questions.length} questions ...`);
+  const csvProcessLogger = getLogger('[csvProcess]');
+  csvProcessLogger.info(`Processing ${questions.length} questions ...`);
 
   let count = 0;
-  const outputData = [];
+  const outputData: ProcessResult[] = [];
   let currentCount = 1; // Start from 1
 
   while (questions.length) {
@@ -146,7 +175,7 @@ export const processCSV = async (
     } = await processBatch(batch, shareUrlBasePath, currentCount);
 
     if (failureCount > CONSECUTIVE_FAILURE_THRESHOLD) {
-      console.error(
+      csvProcessLogger.error(
         `Stopping execution due to exceeding failure threshold of ${CONSECUTIVE_FAILURE_THRESHOLD} in a single batch.`
       );
       break;
@@ -156,5 +185,6 @@ export const processCSV = async (
     currentCount = updatedCount;
   }
 
+  csvProcessLogger.info("writing output to csv");
   await writeOutputToCSV(outputData, count, shareUrlBasePath);
 };

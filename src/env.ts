@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const envSchema = z.object({
-    INKEEP_INTEGRATION_ID: z.string().min(1),
+    INKEEP_INTEGRATION_ID: z.string().optional().default('evaluation'),
     INKEEP_API_KEY: z.string().min(1),
     FILE_PATH:  z.string().min(1),
     SHARE_URL_BASE_PATH:z.string().min(1),

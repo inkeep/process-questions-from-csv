@@ -1,4 +1,4 @@
-# Quick Start Guide for Inkeep Search and Chat API
+# Bulk Upload Questions to Inkeep for evaluation
 
 This repo is a sample of how to batch process questions from a CSV into an output csv.
 
@@ -50,7 +50,7 @@ You can also view all the questions in the Inkeep Dashboard. By providing a tag 
    ```
 
 3. **Add your questions**
-   Put your questions CSV in inputs/questions.csv
+   Put your questions CSV in inputs/questions.csv. A sample file is provided at `/inputs/questions.csv` for reference.
 
 4. **Configure Environment Variables**
    Make sure to create a `.env` file at the root of the project and define the following variables:
