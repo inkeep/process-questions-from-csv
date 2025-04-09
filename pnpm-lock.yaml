@@ -11,6 +11,9 @@ importers:
       '@inkeep/ai-api':
         specifier: ^0.7.2
         version: 0.7.2(zod@3.23.4)
+      '@inkeep/inkeep-analytics':
+        specifier: 0.2.4-alpha.21
+        version: 0.2.4-alpha.21(zod@3.23.4)
       dotenv:
         specifier: ^16.3.1
         version: 16.4.5
@@ -57,6 +60,25 @@ packages:
     resolution: {integrity: sha512-SuxorncwgrzMunK2x9TktYLE0hU9+utgDhnGZGGjKOHGd3f2obkd4HrViR6opC6cX8mxcv3wVJ6glVMjsIwvvA==}
     peerDependencies:
       zod: '>= 3'
+
+  '@inkeep/inkeep-analytics@0.2.4-alpha.21':
+    resolution: {integrity: sha512-LDvJGcrMq5PhxIXphpPyVEpTi6v453EO39Dofid+Go4Oi+tii5UPCqEG18uvMGe/O6ntfSwMDT1CHPP3Dzafzw==}
+    hasBin: true
+    peerDependencies:
+      '@modelcontextprotocol/sdk': ^1.5.0
+      '@tanstack/react-query': ^5
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
+      zod: '>= 3'
+    peerDependenciesMeta:
+      '@modelcontextprotocol/sdk':
+        optional: true
+      '@tanstack/react-query':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -219,6 +241,10 @@ snapshots:
       lodash.uniq: 4.5.0
 
   '@inkeep/ai-api@0.7.2(zod@3.23.4)':
+    dependencies:
+      zod: 3.23.4
+
+  '@inkeep/inkeep-analytics@0.2.4-alpha.21(zod@3.23.4)':
     dependencies:
       zod: 3.23.4
 

@@ -11,7 +11,7 @@ const envSchema = z.object({
     SHARE_URL_BASE_PATH:z.string().min(1),
     CHAT_MODE: z.string().min(1).optional(),
     TAGS: z.string().min(1).optional(),
-    BATCH_SIZE: z.string().optional().transform((value) => value ? parseInt(value) : undefined).refine(value => value === undefined || !isNaN(value), {
+    BATCH_SIZE: z.string().optional().transform((value) => value ? Number.parseInt(value) : undefined).refine(value => value === undefined || !Number.isNaN(value), {
         message: "BATCH_SIZE must be a valid integer",
     }),
 });

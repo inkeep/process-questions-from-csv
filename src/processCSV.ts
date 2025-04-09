@@ -1,8 +1,9 @@
 import * as fastcsv from "fast-csv";
-import fs, { promises as fsPromises } from "fs";
+import fs, { promises as fsPromises } from "node:fs";
 import { removeCitations } from "./stripCitations";
 import { env } from "./env";
 import { InkeepAI } from "@inkeep/ai-api";
+import { InkeepAnalytics } from "@inkeep/inkeep-analytics/dist/commonjs/sdk/sdk";
 
 const BATCH_SIZE = env.BATCH_SIZE || 2;
 const CONSECUTIVE_FAILURE_THRESHOLD = 2;
@@ -40,6 +41,8 @@ const processBatch = async (
       const sdk = new InkeepAI({
         apiKey: env.INKEEP_API_KEY,
       });
+      const analytics = new InkeepAnalytics();
+
       const res = await sdk.chatSession.create({
         chatSession: {
           messages: [
@@ -64,6 +67,25 @@ const processBatch = async (
       const tagsQueryParam = tags ? `&tags=${tags.join(",")}` : "";
       const view_chat_url = `${shareUrlBasePath}?chatId=${chatResult.chatSessionId}${tagsQueryParam}`;
 
+
+      await analytics.conversations.log( {
+        apiIntegrationKey: env.INKEEP_API_KEY,
+      },
+      {
+        type: "openai",
+        messages: [
+          {
+            role: "user",
+            content: question,
+          },
+          {
+            role: "assistant",
+            content: answer,
+          },
+        ],
+
+      });
+
       return { question, answer, view_chat_url };
     } catch (error) {
       console.error("Error processing chat:", error);
@@ -78,10 +100,10 @@ const processBatch = async (
     view_chat_url: string;
   }[];
 
-  results.forEach((result) => {
+  for (const result of results) {
     console.log(`${currentCount}. ${result.view_chat_url}`);
     currentCount++;
-  });
+  }
 
   return { results, failureCount, currentCount };
 };
