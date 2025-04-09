@@ -7,8 +7,8 @@ dotenv.config();
 const envSchema = z.object({
     INKEEP_INTEGRATION_ID: z.string().optional().default('evaluation'),
     INKEEP_API_KEY: z.string().min(1),
-    FILE_PATH:  z.string().min(1),
-    SHARE_URL_BASE_PATH:z.string().min(1),
+    FILE_PATH:  z.string().min(1).default('./inputs/questions.csv'),
+    SHARE_URL_BASE_PATH:z.string().min(1).url(),
     CHAT_MODE: z.string().min(1).optional(),
     TAGS: z.string().min(1).optional(),
     BATCH_SIZE: z.string().optional().transform((value) => value ? Number.parseInt(value) : undefined).refine(value => value === undefined || !Number.isNaN(value), {

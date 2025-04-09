@@ -95,6 +95,7 @@ const processBatch = async (
         id: chatSessionId,
         type: "openai",
         visibility: "public",
+        properties: { tags },
         messages: [
           {
             role: "user",
