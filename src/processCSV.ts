@@ -92,9 +92,7 @@ const processBatch = async (
 };
 
 export const processCSV = async (filePath: string) => {
-  const csvQuestions = await readCSV(filePath);
-  // The chat sessions table is by default DESC by creation. Reverse so chat sessions table looks like CSV.
-  const questions = [...csvQuestions].reverse();
+  const questions = await readCSV(filePath);
 
   let currentCount = 0;
   let totalSuccessCount = 0;
