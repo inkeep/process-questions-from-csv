@@ -1,27 +1,36 @@
-import z from 'zod';
 import * as process from "node:process";
 import dotenv from "dotenv";
+import z from "zod";
 
 dotenv.config();
 
 const envSchema = z.object({
-    INKEEP_INTEGRATION_ID: z.string().optional().default('evaluation'),
-    INKEEP_API_KEY: z.string().min(1),
-    FILE_PATH:  z.string().min(1).default('./inputs/questions.csv'),
-    SHARE_URL_BASE_PATH:z.string().min(1).url(),
-    CHAT_MODE: z.string().min(1).optional(),
-    TAGS: z.string().min(1).optional(),
-    BATCH_SIZE: z.string().optional().transform((value) => value ? Number.parseInt(value) : undefined).refine(value => value === undefined || !Number.isNaN(value), {
-        message: "BATCH_SIZE must be a valid integer",
-    }),
+  INKEEP_API_KEY: z.string().min(1),
+  FILE_PATH: z.string().min(1).default("./inputs/questions.csv"),
+  TAGS: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value
+        ? value
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean)
+        : [],
+    ),
+  BATCH_SIZE: z.coerce
+    .number()
+    .min(1)
+    .max(5, "BATCH_SIZE cannot be greater than 5")
+    .default(2),
 });
 
 const envServer = envSchema.safeParse(process.env);
 
 if (!envServer.success) {
-    console.log("Error parsing env variables");
-    console.error(envServer.error.issues);
-    process.exit(1);
+  console.log("Error parsing env variables");
+  console.error(envServer.error.issues);
+  process.exit(1);
 }
 
 export const env = envServer.data;

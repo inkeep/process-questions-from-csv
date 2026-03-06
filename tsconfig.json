@@ -1,13 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "baseUrl": "./",
-    "paths": {
-      "*": ["node_modules/*"]
-    },
+    "target": "es2022",
+    "module": "node16",
+    "moduleResolution": "node16",
     "sourceMap": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,6 +12,6 @@
     "noImplicitAny": true,
     "skipLibCheck": true
   },
-  "include": ["src", "utils"],
+  "include": ["src"],
   "exclude": ["node_modules", "build", "dist"]
 }
